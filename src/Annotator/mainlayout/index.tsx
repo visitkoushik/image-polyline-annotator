@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import ShapePoly from "../draw-shapes/shape-poly-line";
 import { IAppImage, IMainLayout, IRegion, ShapeType } from "../model/model";
 import ShapePolygon from "../draw-shapes/shape-polygon";
@@ -10,18 +10,66 @@ import {
   XSampling,
   YSampling
 } from "../model/constants";
+import ClassLabel from "../ClassLabel";
 
-const MainLayout = (prop: IMainLayout) => {
+const MainLayout = (props: IMainLayout) => {
   const [imgIndex, setImgIndex] = useState<number>(0);
   const [regionList, setRegionList] = useState<IRegion[]>([]);
-  const [state, setState] = useState<IRegion | null>(null);
-  const [drawMode, setDrawMode] = useState<ShapeType>("");
-  const [isEditable, setEditable] = useState<boolean>(false); 
+  const initalstate: IRegion = {
+    type: "Poly",
+    fill: "rgba(255,0,0,0.25)",
+    color: "rgba(255,0,0,0.75)",
+    strokeWidth: "2",
+    points: "",
+    inEditmode: true,
+    pix: { x: 1, y: 1 }
+  };
+
+  const updateRegionList = (region: IRegion): IRegion[] => {
+    const newRegionList = regionList.map((r: IRegion) => {
+      if (region.id === r.id) {
+        return region;
+      }
+      return r;
+    });
+    setRegionList(newRegionList);
+    return newRegionList;
+  };
+  // const [selectedRegion, setSelectedRegion] = useReducer(
+  //   (selectedRegion: IRegion | null, updates: IRegion | null): IRegion => {
+  //     if (!updates?.points) {
+  //       return {} as unknown as IRegion;
+  //     }
+  //     const pointsArray = updates.points.split(" ");
+  //     console.log(pointsArray);
+  //     if (pointsArray.length > 4) {
+  //       if (
+  //         pointsArray.slice(0, 2).join(" ") ===
+  //         pointsArray.slice(pointsArray.length - 2).join(" ")
+  //       ) {
+  //         return {
+  //           ...updates,
+  //           points: pointsArray.slice(0, pointsArray.length - 2).join(" ")
+  //         };
+  //       }
+  //     }
+  //     updateRegionList({ ...updates });
+  //     return { ...updates };
+  //   },
+  //   {} as unknown as IRegion
+  // );
+  const [selectedRegion, setSelectedRegion] = useState<IRegion | null>({...initalstate});
+  //useState<IRegion | null>(null);
+  // const [drawMode, setDrawMode] = useState<ShapeType>('Poly');
+  const [isDrawable, setDrawable] = useState<boolean>(false);
+  const [isEditable, setEditable] = useState<boolean>(false);
   const [len, setLen] = useState<number>(0);
-  const [newPoly, setNewPoly] = useState<boolean>(true); 
+  const [newPoly, setNewPoly] = useState<boolean>(true);
 
   const [coordinate, setCoordinate] = useState<string>("");
   const [pix, setPix] = useState<{ x: number; y: number }>();
+
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
 
   const imgref = useRef(null);
 
@@ -40,13 +88,34 @@ const MainLayout = (prop: IMainLayout) => {
     }
   }, [pix]);
 
-  const appimg: IAppImage[] = prop.images;
+  const appimg: IAppImage[] = props.images;
   const styleBoard = {
     width: `${appimg[imgIndex].width ? appimg[imgIndex].width : "100%"}`,
     height: `${appimg[imgIndex].height ? appimg[imgIndex].height : "100%"}`,
     left: "0",
     top: "0",
     position: "absolute" as any
+  };
+
+  const handleSave = (e: IRegion) => {
+    updateRegionList(e);
+    setShowOverlay(false);
+  };
+
+  const handleSelection = (e: IRegion) => {
+    updateRegionList(e);
+  };
+
+  const handleRegionDelete = (e: IRegion) => {
+    const rgl = regionList.filter((r: IRegion) => r.id !== e.id);
+    setShowOverlay(false)
+    setSelectedRegion(null);
+    setRegionList([...rgl]);
+  };
+
+  const handleClick = (e: IRegion) => {
+    setSelectedRegion({ ...e, inEditmode: true });
+    setShowOverlay(true);
   };
 
   const mouseDown = (e: any) => {
@@ -56,34 +125,40 @@ const MainLayout = (prop: IMainLayout) => {
     if (coordinate) {
       onCreatePolygon();
     }
- 
-    setDrawMode("Poly");
+
+    if(!isDrawable && !isEditable && selectedRegion?.points){
+      setSelectedRegion(null)
+      return;
+    }
+
+
+    setDrawable(true);
 
     setEditable(true);
 
     let clonedRegion =
-      newPoly || !state
+      newPoly || !selectedRegion
         ? {
             ...defaultPolyRegion,
             points: `${XSampling(pix, e.clientX)} ${YSampling(pix, e.clientY)}`
           }
-        : { ...state };
+        : { ...selectedRegion };
     setLen(0);
 
-    setState({ ...clonedRegion });
+    setSelectedRegion({ ...clonedRegion });
 
     setNewPoly(false);
   };
 
   const mouseMove = (e: any) => {
-    if (e.button !== 0 || drawMode === "" || !state) return;
+    if (e.button !== 0 || !isDrawable || !selectedRegion) return;
 
     if (coordinate) {
       if (e.button === 0) {
-        if (state?.points) {
-          setState({
-            ...state,
-            points: state.points.replace(
+        if (selectedRegion?.points) {
+          setSelectedRegion({
+            ...selectedRegion,
+            points: selectedRegion.points.replaceAll(
               coordinate,
               `${XSampling(pix, e.clientX)} ${YSampling(pix, e.clientY)}`
             )
@@ -95,7 +170,7 @@ const MainLayout = (prop: IMainLayout) => {
       }
       return;
     }
-    let clonedRegion = { ...state };
+    let clonedRegion = { ...selectedRegion };
     clonedRegion.x = XSampling(pix, e.clientX);
     clonedRegion.y = YSampling(pix, e.clientY);
 
@@ -112,13 +187,13 @@ const MainLayout = (prop: IMainLayout) => {
 
     setLen(2);
 
-    setState({ ...clonedRegion });
+    setSelectedRegion({ ...clonedRegion });
   };
 
   const mouseUp = (e: any) => {
-    if (e.button !== 0 || drawMode === "" || !isEditable || !state) return;
+    if (e.button !== 0 || !isDrawable || !isEditable || !selectedRegion) return;
     setEditable(false);
-    let clonedRegion = { ...state };
+    let clonedRegion = { ...selectedRegion };
     let x = +clonedRegion.points.trim().split(" ")[0];
     let y = +clonedRegion.points.trim().split(" ")[1];
 
@@ -134,24 +209,24 @@ const MainLayout = (prop: IMainLayout) => {
   };
 
   const onCreatePolygon = () => {
-    if (!state) {
+    if (!selectedRegion) {
       return;
     }
     const cState = {
-      ...state,
-      id: state.id || Date.now() + "",
+      ...selectedRegion,
+      id: selectedRegion.id || Date.now() + "",
       inEditmode: false
     };
-    state.points = state.points
+    selectedRegion.points = selectedRegion.points
       .split(" ")
-      .splice(0, state.points.split(" ").length - 2)
+      .splice(0, selectedRegion.points.split(" ").length - 2)
       .join(" ");
 
-    state.points = `${state.points} ${state.points.split(" ")[0]} ${
-      state.points.split(" ")[1]
-    }`;
+    selectedRegion.points = `${selectedRegion.points} ${
+      selectedRegion.points.split(" ")[0]
+    } ${selectedRegion.points.split(" ")[1]}`;
 
-    const cStateUpdated = { ...cState, points: state.points };
+    const cStateUpdated = { ...cState, points: selectedRegion.points };
     const indx = regionList.findIndex((r) => r.id === cStateUpdated.id);
     if (indx === -1) {
       setRegionList((prevlist) => [...prevlist, cStateUpdated]);
@@ -161,15 +236,15 @@ const MainLayout = (prop: IMainLayout) => {
       setRegionList([...rgl]);
     }
 
-    setState({ ...cStateUpdated, inEditmode: true });
-    setNewPoly(true); 
-    setDrawMode("");
+    setSelectedRegion({ ...cStateUpdated, inEditmode: true });
+    setNewPoly(true);
+    setDrawable(false);
     setEditable(false);
     setCoordinate("");
   };
 
-  const onClickPointer = (e: any) => {
-    if (!state) {
+  const onMouseDownPointer = (e: any) => {
+    if (!selectedRegion) {
       return;
     }
     if (coordinate) {
@@ -177,12 +252,17 @@ const MainLayout = (prop: IMainLayout) => {
       return;
     }
 
-    setDrawMode("Poly");
+    setDrawable(true);
     if (e.button === 0) {
       setCoordinate(e.target.attributes.data.value.split(",").join(" "));
     }
   };
 
+  //onMous up of pointer
+  const onMouseUpPointer = () => {
+    setCoordinate("");
+    setDrawable(false);
+  };
   return (
     <div style={styleBoard}>
       <img
@@ -194,11 +274,11 @@ const MainLayout = (prop: IMainLayout) => {
           setPix({ x: e.target.offsetWidth, y: e.target.offsetHeight });
         }}
       />
-      {state && !state.id && state.inEditmode && (
+      {selectedRegion && !selectedRegion.id && selectedRegion.inEditmode && (
         <div>
           <Pointer
             pix={pix || { x: 1, y: 1 }}
-            region={{ ...state }}
+            region={{ ...selectedRegion }}
             isEnabled={false}
           />
         </div>
@@ -209,22 +289,45 @@ const MainLayout = (prop: IMainLayout) => {
         onMouseMove={mouseMove}
         onMouseUp={mouseUp}
       >
-        {state && <ShapePoly {...state} />}
-        <ShapePolygon
-          pix={pix || { x: 1, y: 1 }}
-          regionlist={[...regionList].filter((f) => f.id !== state?.id)}
-        />
+        {selectedRegion && <ShapePoly {...selectedRegion} />}
+        <>
+          {[...regionList]
+            .filter((f) => f.id !== selectedRegion?.id)
+            .map((r: IRegion) => (
+              <ShapePolygon {...r} key={r.id + "_polygon"} />
+            ))}
+        </>
       </svg>
-      {state?.id && state?.inEditmode && (
+      {selectedRegion?.id && selectedRegion?.inEditmode && (
         <div>
           <Pointer
             pix={pix || { x: 1, y: 1 }}
-            region={{ ...state }}
-            onMouseDown={onClickPointer}
+            region={{ ...selectedRegion }}
+            onMouseDown={onMouseDownPointer}
+            onMouseUp={onMouseUpPointer}
             isEnabled={true}
+            selected={coordinate}
           />
         </div>
       )}
+      {showOverlay && (
+        <div style={styleBoard} onClick={(e: any) => e.stopPropagation()}></div>
+      )}
+      {pix &&
+        regionList &&
+        regionList.length &&
+        regionList.map((r: IRegion) => (
+          <ClassLabel
+            key={r.id + "class"}
+            region={r}
+            pix={pix}
+            msglist={props.imsg}
+            onSave={handleSave}
+            onSelectionChange={handleSelection}
+            onDelete={handleRegionDelete}
+            onClick={handleClick}
+          />
+        ))}
     </div>
   );
 };

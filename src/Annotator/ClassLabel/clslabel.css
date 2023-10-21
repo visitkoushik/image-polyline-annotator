@@ -1,0 +1,89 @@
+.body {
+  max-height: 80px;
+  max-width: 8rem;
+  width: fit-content;
+  background: rgb(249 255 210);
+  border-radius: 5px;
+  position: absolute;
+  z-index: 10;
+  color: rgb(87 87 87);
+  font-weight: bold;
+  font-size: 0.6rem;
+  padding: 7px;
+  cursor: pointer;
+}
+.modalbody {
+  height: fit-content;
+  width: 15rem;
+  background: rgb(249 255 210);
+  border-radius: 5px;
+  position: absolute;
+  z-index: 10;
+  color: rgb(87 87 87);
+  font-weight: bold;
+  font-size: 0.6rem;
+  padding: 7px;
+}
+
+.modalbody > .header {
+  width: 100%;
+  height: 30px;
+  border-bottom: 1px solid #d2d2d2;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.modalbody > .header > .typeheader {
+  width: 50px;
+  height: 7px;
+  color: #fff;
+  background-color: red;
+  border-radius: 5px;
+  line-height: 7px;
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+.modalbody > .header > .deletebtn {
+  width: 20px;
+  height: 100%;
+  color: #6d6d6d;
+  background-color: transparent;
+  border-radius: 5px;
+  line-height: 7px;
+  text-align: center;
+  font-weight: bold;
+}
+.modalbody > .header > .deletebtn > img {
+  cursor: pointer;
+}
+
+.modalbody > .inputbody {
+  width: 100%;
+  height: fit-content;
+  min-height: 2rem;
+  display: contents;
+  padding: 1rem 0;
+}
+.modalbody > .footer {
+  width: 100%;
+  height: fit-content;
+  min-height: 30px;
+  border-top: 1px solid #d2d2d2;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.modalbody > .footer > .buttondone {
+  background-color: rgb(51, 51, 255);
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  text-align: center;
+  width: 3rem;
+  font-size: 1rem;
+  margin-top: 0.3rem;
+  cursor: pointer;
+}

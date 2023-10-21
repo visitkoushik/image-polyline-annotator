@@ -1,29 +1,33 @@
-import { ReverseSampling_X, ReverseSampling_Y, XSampling, YSampling } from "../../model/constants";
-import { IShape } from "../../model/model";
+import {
+  ReverseSampling_X,
+  ReverseSampling_Y,
+  XSampling,
+  YSampling
+} from "../../model/constants";
+import { IRegion } from "../../model/model";
 
-const ShapePolygon = (props: IShape) => {
-   
+const ShapePolygon = (region: IRegion) => {
+
+  
+  const pnts = region.points
+    .split(" ")
+    .map((p: string, inx: number) =>
+      inx % 2 === 0
+        ? ReverseSampling_X(region.pix, +p)
+        : ReverseSampling_Y(region.pix, +p)
+    )
+    .join(" ");
   return (
     <>
-      {props.regionlist.map((m) => {
-        const pnts = m.points
-          .split(" ")
-          .map((p, inx) =>
-            inx % 2 === 0 ? ReverseSampling_X(props.pix, +p) : ReverseSampling_Y(props.pix, +p)
-          )
-          .join(" "); 
-          
-        return (
-          <polygon
-            key={m.id}
-            stroke={m.color}
-            color={m.color}
-            fill={m.fill}
-            points={pnts}
-            strokeWidth={m.strokeWidth}
-          />
-        );
-      })}
+      {
+        <polygon
+          stroke={region.color}
+          color={region.color}
+          fill={region.fill}
+          points={pnts}
+          strokeWidth={region.strokeWidth}
+        />
+      }
     </>
   );
 };

@@ -16,9 +16,14 @@ export interface IPointer {
 
 const Pointer = (props: IPointer) => {
   const coordinates: number[][] = [];
-
+  let allpoints = props.region.points.split(' ');
+  debugger
+  if(allpoints.length<=1){
+    return <></>
+  }
+ 
   for (
-    let i = 0, points = props.region.points.split(" ");
+    let i = 0, points = allpoints;
     i < points.length;
     i += 2
   ) {

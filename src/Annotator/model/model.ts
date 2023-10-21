@@ -1,13 +1,10 @@
 export type ShapeType = "Poly" | "Eclipse" | "";
 
-export interface IShape {
-  regionlist: IRegion[];
-  currentRegion?: IRegion;
-  pix: { x: number; y: number };
-}
+ 
 
 export interface IMainLayout {
   images: IAppImage[];
+  imsg: IMessage[];
 }
 
 export interface IRegion {
@@ -20,7 +17,8 @@ export interface IRegion {
   strokeWidth: string;
   x?: number;
   y?: number;
-  inEditmode: boolean; 
+  inEditmode: boolean;
+  msg?: IMessage;
 }
 
 export interface IAppImage {
@@ -34,4 +32,20 @@ export interface IAnnotator {
   images: IAppImage[];
   regionClassList?: string[];
   regionTagList?: string[];
+  messageList?: IMessage[];
+}
+
+export interface IClassLable {
+  onClick?: (e: any) => void;
+  onSave?: (e: IRegion) => void;
+  onSelectionChange?: (e: IRegion) => void;
+  onDelete?: (e: IRegion) => void;
+  region: IRegion;
+  pix: { x: number; y: number };
+  msglist: IMessage[];
+}
+
+export interface IMessage {
+  label: string;
+  value: number;
 }
