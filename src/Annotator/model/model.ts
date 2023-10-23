@@ -1,38 +1,46 @@
-export type ShapeType = "Poly" | "Eclipse" | "";
+export type ShapeType = "Poly" | "RECTANGLE" | "";
 
  
 
 export interface IMainLayout {
   images: IAppImage[];
   imsg: IMessage[];
+  width:number;
+  height:number;
+  gap?:number;
 }
 
 export interface IRegion {
-  pix: { x: number; y: number };
-  type: ShapeType;
+  pix: { x: number; y: number }; 
+  type: string;
   id?: string;
   fill: string;
   color: string;
   points: string;
-  strokeWidth: string;
-  x?: number;
-  y?: number;
+  strokeWidth: string; 
   inEditmode: boolean;
   msg?: IMessage;
+  onSelectShape?:()=>void;
 }
 
 export interface IAppImage {
   url: string;
   name?: string;
-  width?: string;
-  height?: string;
+  regions?:IRegion[];
 }
 
 export interface IAnnotator {
   images: IAppImage[];
+  
+  width:number;
+  height:number;
   regionClassList?: string[];
   regionTagList?: string[];
   messageList?: IMessage[];
+  onSave?:(e:any)=>void
+  selectShapePoly?:(e:any)=>void
+  selectShapeRect?:(e:any)=>void
+  onDownload?:(e:any)=>void
 }
 
 export interface IClassLable {
@@ -41,11 +49,19 @@ export interface IClassLable {
   onSelectionChange?: (e: IRegion) => void;
   onDelete?: (e: IRegion) => void;
   region: IRegion;
-  pix: { x: number; y: number };
+  pix: { x: number; y: number }; 
   msglist: IMessage[];
 }
 
 export interface IMessage {
   label: string;
   value: number;
+}
+
+export interface IPointer {
+  region: IRegion;
+  onMouseUp?: (e: any) => void;
+  onMouseDown?: (e: any) => void;
+  isEnabled?: boolean;
+  selected?: any; 
 }

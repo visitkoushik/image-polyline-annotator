@@ -1,19 +1,23 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useReducer,
+  useRef,
+  useState
+} from "react";
 import ShapePoly from "../draw-shapes/shape-poly-line";
 import { IAppImage, IMainLayout, IRegion, ShapeType } from "../model/model";
 import ShapePolygon from "../draw-shapes/shape-polygon";
 import Pointer from "../pointer";
-import {
-  Pointer_Height_Width,
-  ReverseSampling_X,
-  ReverseSampling_Y,
-  XSampling,
-  YSampling
-} from "../model/constants";
-import ClassLabel from "../ClassLabel";
 
-const MainLayout = (props: IMainLayout) => {
-  const [imgIndex, setImgIndex] = useState<number>(0);
+import ClassLabel from "../ClassLabel";
+import { mousePolyEvent } from "../draw-shapes/mousePolyEvent";
+import { mouseRectEvent } from "../draw-shapes/mouseRectEvent";
+
+const MainLayout = forwardRef((props: IMainLayout, ref) => {
+  const [imgIndex, setImgIndex] = useState<number>(1);
+  const [appimg, setAppimg] = useState<IAppImage[]>();
   const [regionList, setRegionList] = useState<IRegion[]>([]);
   const initalstate: IRegion = {
     type: "Poly",
@@ -25,54 +29,42 @@ const MainLayout = (props: IMainLayout) => {
     pix: { x: 1, y: 1 }
   };
 
-  const updateRegionList = (region: IRegion): IRegion[] => {
-    const newRegionList = regionList.map((r: IRegion) => {
-      if (region.id === r.id) {
-        return region;
-      }
-      return r;
-    });
-    setRegionList(newRegionList);
-    return newRegionList;
-  };
-  // const [selectedRegion, setSelectedRegion] = useReducer(
-  //   (selectedRegion: IRegion | null, updates: IRegion | null): IRegion => {
-  //     if (!updates?.points) {
-  //       return {} as unknown as IRegion;
-  //     }
-  //     const pointsArray = updates.points.split(" ");
-  //     console.log(pointsArray);
-  //     if (pointsArray.length > 4) {
-  //       if (
-  //         pointsArray.slice(0, 2).join(" ") ===
-  //         pointsArray.slice(pointsArray.length - 2).join(" ")
-  //       ) {
-  //         return {
-  //           ...updates,
-  //           points: pointsArray.slice(0, pointsArray.length - 2).join(" ")
-  //         };
-  //       }
-  //     }
-  //     updateRegionList({ ...updates });
-  //     return { ...updates };
-  //   },
-  //   {} as unknown as IRegion
-  // );
-  const [selectedRegion, setSelectedRegion] = useState<IRegion | null>({...initalstate});
+  const [selectedRegion, setSelectedRegion] = useState<IRegion | null>({
+    ...initalstate
+  });
   //useState<IRegion | null>(null);
-  // const [drawMode, setDrawMode] = useState<ShapeType>('Poly');
+  const [drawMode, setDrawMode] = useState<ShapeType>("");
   const [isDrawable, setDrawable] = useState<boolean>(false);
   const [isEditable, setEditable] = useState<boolean>(false);
   const [len, setLen] = useState<number>(0);
   const [newPoly, setNewPoly] = useState<boolean>(true);
 
   const [coordinate, setCoordinate] = useState<string>("");
-  const [pix, setPix] = useState<{ x: number; y: number }>();
+  const [pix, setPix] = useState<{ x: number; y: number }>({
+    x: 1,
+    y: 1
+  });
+  const [imgPos, setImgPos] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0
+  });
 
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
-
   const imgref = useRef(null);
-
+  const styleBoard = {
+    width: `calc(100% - ${(props.gap || 0) / 2}px)`,
+    height: `calc(100% - ${(props.gap || 0) / 2}px )`,
+    left: "0px",
+    top: "0px",
+    position: "absolute" as any
+  };
+  const styleBoardContainer = {
+    width: `${props.width ? props.width - (props.gap || 0) + "px" : "100%"}`,
+    height: `${props.height ? props.height - (props.gap || 0) + "px" : "100%"}`,
+    left: `${(props.gap || 0) / 2}px`,
+    top: `${(props.gap || 0) / 2}px`,
+    position: "relative" as any
+  };
   let defaultPolyRegion: IRegion = {
     type: "Poly",
     fill: "rgba(255,0,0,0.25)",
@@ -82,131 +74,76 @@ const MainLayout = (props: IMainLayout) => {
     inEditmode: true,
     pix: pix || { x: 1, y: 1 }
   };
+
+  useEffect(() => {
+    setPix({ x: props.width, y: props.height });
+    setRegionList(
+      regionList.map((r: IRegion) => ({
+        ...r,
+        pix: { x: props.width, y: props.height }
+      }))
+    );
+    if (selectedRegion) {
+      setSelectedRegion({
+        ...selectedRegion,
+        pix: { x: props.width, y: props.height }
+      });
+    }
+  }, [props.width, props.height]);
+
   useEffect(() => {
     if (defaultPolyRegion && pix) {
       defaultPolyRegion.pix = pix || { x: 1, y: 1 };
     }
+    let boundingBox: any = null;
+    if (imgref?.current) {
+      //@ts-ignore
+      boundingBox = imgref.current.getBoundingClientRect();
+    }
+
+    setImgPos({
+      x: boundingBox ? boundingBox.left : 1,
+
+      y: boundingBox ? boundingBox.top : 1
+    });
   }, [pix]);
 
-  const appimg: IAppImage[] = props.images;
-  const styleBoard = {
-    width: `${appimg[imgIndex].width ? appimg[imgIndex].width : "100%"}`,
-    height: `${appimg[imgIndex].height ? appimg[imgIndex].height : "100%"}`,
-    left: "0",
-    top: "0",
-    position: "absolute" as any
-  };
-
-  const handleSave = (e: IRegion) => {
-    updateRegionList(e);
-    setShowOverlay(false);
-  };
-
-  const handleSelection = (e: IRegion) => {
-    updateRegionList(e);
-  };
-
-  const handleRegionDelete = (e: IRegion) => {
-    const rgl = regionList.filter((r: IRegion) => r.id !== e.id);
-    setShowOverlay(false)
-    setSelectedRegion(null);
-    setRegionList([...rgl]);
-  };
-
-  const handleClick = (e: IRegion) => {
-    setSelectedRegion({ ...e, inEditmode: true });
-    setShowOverlay(true);
-  };
-
-  const mouseDown = (e: any) => {
-    if (e.button !== 0) {
-      return;
-    }
-    if (coordinate) {
-      onCreatePolygon();
-    }
-
-    if(!isDrawable && !isEditable && selectedRegion?.points){
-      setSelectedRegion(null)
-      return;
-    }
-
-
-    setDrawable(true);
-
-    setEditable(true);
-
-    let clonedRegion =
-      newPoly || !selectedRegion
-        ? {
-            ...defaultPolyRegion,
-            points: `${XSampling(pix, e.clientX)} ${YSampling(pix, e.clientY)}`
-          }
-        : { ...selectedRegion };
-    setLen(0);
-
-    setSelectedRegion({ ...clonedRegion });
-
-    setNewPoly(false);
-  };
-
-  const mouseMove = (e: any) => {
-    if (e.button !== 0 || !isDrawable || !selectedRegion) return;
-
-    if (coordinate) {
-      if (e.button === 0) {
-        if (selectedRegion?.points) {
-          setSelectedRegion({
-            ...selectedRegion,
-            points: selectedRegion.points.replaceAll(
-              coordinate,
-              `${XSampling(pix, e.clientX)} ${YSampling(pix, e.clientY)}`
-            )
-          });
-          setCoordinate(
-            `${XSampling(pix, e.clientX)} ${YSampling(pix, e.clientY)}`
-          );
-        }
-      }
-      return;
-    }
-    let clonedRegion = { ...selectedRegion };
-    clonedRegion.x = XSampling(pix, e.clientX);
-    clonedRegion.y = YSampling(pix, e.clientY);
-
-    clonedRegion = {
-      ...clonedRegion,
-      points: !clonedRegion.points
-        ? `${clonedRegion.x} ${clonedRegion.y}`
-        : `${clonedRegion.points
-            .trim()
-            .split(" ")
-            .slice(0, clonedRegion.points.trim().split(" ").length - len)
-            .join(" ")} ${clonedRegion.x} ${clonedRegion.y}`
-    };
-
-    setLen(2);
-
-    setSelectedRegion({ ...clonedRegion });
-  };
-
-  const mouseUp = (e: any) => {
-    if (e.button !== 0 || !isDrawable || !isEditable || !selectedRegion) return;
-    setEditable(false);
-    let clonedRegion = { ...selectedRegion };
-    let x = +clonedRegion.points.trim().split(" ")[0];
-    let y = +clonedRegion.points.trim().split(" ")[1];
-
+  useEffect(() => {
+    setAppimg(props.images);
     if (
-      clonedRegion.points.split(" ").length > 6 &&
-      ReverseSampling_X(pix, x) - Pointer_Height_Width <= e.clientX &&
-      ReverseSampling_Y(pix, y) - Pointer_Height_Width <= e.clientY &&
-      ReverseSampling_X(pix, x) + Pointer_Height_Width >= e.clientX &&
-      ReverseSampling_Y(pix, y) + Pointer_Height_Width >= e.clientY
+      props.images &&
+      props.images[imgIndex] &&
+      props.images[imgIndex].regions
     ) {
-      onCreatePolygon();
+      setRegionList([...(props.images[imgIndex].regions || [])]);
     }
-  };
+
+    setDrawMode("");
+    setDrawable(false);
+    setEditable(true);
+    setCoordinate("");
+    setSelectedRegion(null);
+    setNewPoly(false);
+    setLen(0);
+  }, [props.images, imgIndex]);
+
+  useImperativeHandle(ref, () => ({
+    saveRegionList: () => {
+      if (appimg) {
+        return {
+          ...appimg[imgIndex],
+          regions: [...regionList]
+        };
+      }
+      return null;
+    },
+    setDrawModePolly: () => {
+      setDrawMode("Poly");
+    },
+    setDrawModeRect: () => {
+      setDrawMode("RECTANGLE");
+    }
+  }));
 
   const onCreatePolygon = () => {
     if (!selectedRegion) {
@@ -226,13 +163,24 @@ const MainLayout = (props: IMainLayout) => {
       selectedRegion.points.split(" ")[0]
     } ${selectedRegion.points.split(" ")[1]}`;
 
-    const cStateUpdated = { ...cState, points: selectedRegion.points };
+    const length = Array.from(new Set(selectedRegion.points.split(" "))).length;
+    const type = length !== 4 ? "Polygon" : "Rectangle";
+    const cStateUpdated = {
+      ...cState,
+      points: selectedRegion.points,
+      type: type
+    };
     const indx = regionList.findIndex((r) => r.id === cStateUpdated.id);
     if (indx === -1) {
-      setRegionList((prevlist) => [...prevlist, cStateUpdated]);
+      const rgl = [...regionList, cStateUpdated];
+      setRegionList([...rgl]);
     } else {
-      const rgl = [...regionList];
-      rgl[indx] = cStateUpdated;
+      const rgl = [...regionList].map((r: IRegion) => {
+        if (r.id === cStateUpdated.id) {
+          return cStateUpdated;
+        }
+        return r;
+      });
       setRegionList([...rgl]);
     }
 
@@ -263,8 +211,108 @@ const MainLayout = (props: IMainLayout) => {
     setCoordinate("");
     setDrawable(false);
   };
-  return (
-    <div style={styleBoard}>
+
+  const polyEvent = mousePolyEvent(
+    coordinate,
+    setCoordinate,
+    selectedRegion,
+    setSelectedRegion,
+    isDrawable,
+    isEditable,
+    setDrawable,
+    setEditable,
+    imgPos,
+    defaultPolyRegion,
+    newPoly,
+    setNewPoly,
+    pix,
+    len,
+    setLen,
+    onCreatePolygon,
+    regionList,
+    setRegionList,
+    setShowOverlay,
+    drawMode,
+    setDrawMode
+  );
+  const rectEvent = mouseRectEvent(
+    coordinate,
+    setCoordinate,
+    selectedRegion,
+    setSelectedRegion,
+    isDrawable,
+    isEditable,
+    setDrawable,
+    setEditable,
+    imgPos,
+    defaultPolyRegion,
+    newPoly,
+    setNewPoly,
+    pix,
+    len,
+    setLen,
+    onCreatePolygon,
+    regionList,
+    setRegionList,
+    setShowOverlay,
+    drawMode,
+    setDrawMode
+  );
+  const getMouseDown = () => {
+    if (drawMode === "Poly") {
+      return polyEvent.mouseDown;
+    }
+    if (drawMode === "RECTANGLE") {
+      return rectEvent.mouseDown;
+    }
+    return () => {};
+  };
+  const getMouseUp = () => {
+    if (drawMode === "Poly") {
+      return polyEvent.mouseUp;
+    }
+    if (drawMode === "RECTANGLE") {
+      return rectEvent.mouseUp;
+    }
+    return () => {};
+  };
+  const getMouseMove = () => {
+    if (drawMode === "Poly") {
+      return polyEvent.mouseMove;
+    }
+    if (drawMode === "RECTANGLE") {
+      return rectEvent.mouseMove;
+    }
+    return () => {};
+  };
+
+  const handleSave = (e: IRegion) => {
+    setShowOverlay(false);
+  };
+
+  const handleSelection = (e: IRegion) => {
+    if (selectedRegion) {
+      setSelectedRegion({ ...selectedRegion, msg: e.msg });
+    }
+  };
+
+  const handleRegionDelete = (e: IRegion) => {
+    const rgl = regionList.filter((r: IRegion) => r.id !== e.id);
+    setShowOverlay(false);
+    setSelectedRegion(null);
+    setRegionList([...rgl]);
+  };
+
+  const handleClick = (e: IRegion) => {
+    const region = regionList.find((r: IRegion) => r.id === e.id);
+    if (region) {
+      setSelectedRegion({ ...region, inEditmode: true });
+    }
+    setShowOverlay(true);
+    setDrawMode("Poly");
+  };
+  return appimg && appimg.length > imgIndex ? (
+    <div style={styleBoardContainer}>
       <img
         ref={imgref}
         src={appimg[imgIndex].url}
@@ -276,32 +324,37 @@ const MainLayout = (props: IMainLayout) => {
       />
       {selectedRegion && !selectedRegion.id && selectedRegion.inEditmode && (
         <div>
-          <Pointer
-            pix={pix || { x: 1, y: 1 }}
-            region={{ ...selectedRegion }}
-            isEnabled={false}
-          />
+          <Pointer region={{ ...selectedRegion }} isEnabled={false} />
         </div>
       )}
+
       <svg
-        style={styleBoard}
-        onMouseDown={mouseDown}
-        onMouseMove={mouseMove}
-        onMouseUp={mouseUp}
+        style={{
+          ...styleBoard,
+          cursor: `${drawMode === "" ? "default" : "crosshair"}`
+        }}
+        onMouseDown={getMouseDown()}
+        onMouseMove={getMouseMove()}
+        onMouseUp={getMouseUp()}
       >
         {selectedRegion && <ShapePoly {...selectedRegion} />}
         <>
           {[...regionList]
             .filter((f) => f.id !== selectedRegion?.id)
             .map((r: IRegion) => (
-              <ShapePolygon {...r} key={r.id + "_polygon"} />
+              <ShapePolygon
+                {...r}
+                key={r.id + "_shape"}
+                onSelectShape={() => {
+                  setSelectedRegion(r);
+                }}
+              />
             ))}
         </>
       </svg>
       {selectedRegion?.id && selectedRegion?.inEditmode && (
         <div>
           <Pointer
-            pix={pix || { x: 1, y: 1 }}
             region={{ ...selectedRegion }}
             onMouseDown={onMouseDownPointer}
             onMouseUp={onMouseUpPointer}
@@ -315,7 +368,7 @@ const MainLayout = (props: IMainLayout) => {
       )}
       {pix &&
         regionList &&
-        regionList.length &&
+        regionList.length > 0 &&
         regionList.map((r: IRegion) => (
           <ClassLabel
             key={r.id + "class"}
@@ -329,7 +382,9 @@ const MainLayout = (props: IMainLayout) => {
           />
         ))}
     </div>
+  ) : (
+    <>No image resource available</>
   );
-};
+});
 
 export default MainLayout;

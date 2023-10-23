@@ -7,8 +7,9 @@ import {
 import { IRegion } from "../../model/model";
 
 const ShapePolygon = (region: IRegion) => {
-
-  
+  if (!region?.points) {
+    return <></>;
+  }
   const pnts = region.points
     .split(" ")
     .map((p: string, inx: number) =>
@@ -26,6 +27,11 @@ const ShapePolygon = (region: IRegion) => {
           fill={region.fill}
           points={pnts}
           strokeWidth={region.strokeWidth}
+          onClick={(e: any) => {
+            if (region.onSelectShape) {
+              region.onSelectShape();
+            }
+          }}
         />
       }
     </>

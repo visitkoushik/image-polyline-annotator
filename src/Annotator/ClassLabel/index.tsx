@@ -16,14 +16,16 @@ const ClassLabel = (props: IClassLable) => {
       fontWeight: "500"
     })
   };
-
   useEffect(()=>{
+    console.log('REGION UPDATED: ',props.region)
+    setRegion({ ...props.region });
+  },[props.region])
 
-    if(!region.msg){
-        if (props.onClick) props.onClick(region);
+  useEffect(() => {
+    if (!region.msg) {
+      if (props.onClick) props.onClick(region);
     }
-
-  },[])
+  }, []);
   if (region) {
     const x: number = Math.min(
       //min x
@@ -44,6 +46,7 @@ const ClassLabel = (props: IClassLable) => {
       newValue: unknown,
       actionMeta: ActionMeta<unknown>
     ) => {
+ 
       region.msg = newValue as IMessage;
       if (props.onSelectionChange) props.onSelectionChange({ ...region });
       setRegion(region);
@@ -60,7 +63,7 @@ const ClassLabel = (props: IClassLable) => {
             }}
           >
             <div className="header">
-              <div className="typeheader">Polygon</div>
+              <div className="typeheader">{region.type}</div>
               <div className="deletebtn">
                 <img
                   src={process.env.PUBLIC_URL + "/delete-77.svg"}
