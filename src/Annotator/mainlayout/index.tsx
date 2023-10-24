@@ -259,9 +259,23 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       return null;
     },
     setDrawModePolly: () => {
+   
+      setDrawable(false);
+      setEditable(true);
+      setCoordinate("");
+      setSelectedRegion(null);
+      setNewPoly(false);
+      setLen(0);
       setDrawMode("Poly");
     },
     setDrawModeRect: () => {
+       
+      setDrawable(false);
+      setEditable(true);
+      setCoordinate("");
+      setSelectedRegion(null);
+      setNewPoly(false);
+      setLen(0);
       setDrawMode("RECTANGLE");
     },
     downloadasImage: () => {

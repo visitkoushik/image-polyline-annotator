@@ -84,7 +84,7 @@ const ClassLabel = (props: IClassLable) => {
             </div>
             <div className="footer">
               <div
-                className="buttondone"
+                className={`buttondone ${region.msg?'active':''}`}
                 onClick={(e: any) => {
                   if (props.onSave) props.onSave(e);
                   setOpenModal(false || region.msg === undefined);
