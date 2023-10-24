@@ -89,7 +89,7 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
             }}
             className="label"
           >
-            Mao
+            {props.label ?? "Draw Anotation"}
           </div>
           <div
             style={{
@@ -178,7 +178,7 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
           <MainLayout
             ref={mainRef}
             images={selectedImage}
-            imsg={props.messageList || []}
+            iantTag={props.messageList || []}
             width={props.width - HW_SIZE}
             height={props.height - HW_SIZE}
             gap={16}

@@ -2,7 +2,7 @@ export type ShapeType = "Poly" | "RECTANGLE" | "";
 
 export interface IMainLayout {
   images: IAppImage;
-  imsg: IMessage[];
+  iantTag: IAnnoteClass[];
   width: number;
   height: number;
   gap?: number;
@@ -17,7 +17,7 @@ export interface IRegion {
   points: string;
   strokeWidth: string;
   inEditmode: boolean;
-  msg?: IMessage;
+  antTag: IAnnoteRigeion;
 }
 
 export interface IAppImage {
@@ -29,12 +29,12 @@ export interface IAppImage {
 
 export interface IAnnotator {
   images: IAppImage[];
-
+  label?: string;
   width: number;
   height: number;
   regionClassList?: string[];
   regionTagList?: string[];
-  messageList?: IMessage[];
+  messageList?: IAnnoteClass[];
   onSave?: (e: any) => void;
   selectShapePoly?: (e: any) => void;
   selectShapeRect?: (e: any) => void;
@@ -48,14 +48,22 @@ export interface IClassLable {
   onDelete?: (e: IRegion) => void;
   region: IRegion;
   pix: { x: number; y: number };
-  msglist: IMessage[];
+  annotlist: IAnnoteClass[];
 }
 
-export interface IMessage {
+export interface IAnnotTags {
   label: string;
   value: number;
 }
+export interface IAnnoteClass {
+  name: string;
+  placeHolder: string;
+  ianotTag: IAnnotTags[];
+}
 
+export interface IAnnoteRigeion {
+  [key: string]: IAnnotTags;
+}
 export interface IPointer {
   region: IRegion;
   onMouseUp?: (e: any) => void;

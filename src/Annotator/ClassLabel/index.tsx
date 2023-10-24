@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import { ReverseSampling_X, ReverseSampling_Y } from "../model/constants";
-import { IClassLable, IMessage, IRegion } from "../model/model";
+import {
+  IClassLable,
+  IAnnotTags,
+  IRegion,
+  IAnnoteClass,
+  IAnnoteRigeion
+} from "../model/model";
 import Select, { ActionMeta, StylesConfig } from "react-select";
 import "./clslabel.css";
 
 const ClassLabel = (props: IClassLable) => {
-  const [openmodal, setOpenModal] = useState(props.region?.msg === undefined);
+  const [openmodal, setOpenModal] = useState(
+    Object.keys(props.region?.antTag).length === 0
+  );
   const [region, setRegion] = useState<IRegion>({ ...props.region });
 
   const colorStyle: StylesConfig = {
@@ -13,7 +21,8 @@ const ClassLabel = (props: IClassLable) => {
       ...styles,
       backgroundColor: "transparent",
       fontSize: "0.8rem",
-      fontWeight: "500"
+      fontWeight: "500",
+      marginBottom: "10px"
     })
   };
   useEffect(() => {
@@ -22,7 +31,7 @@ const ClassLabel = (props: IClassLable) => {
   }, [props.region]);
 
   useEffect(() => {
-    if (!region.msg) {
+    if (!region.antTag) {
       if (props.onClick) props.onClick(region);
     }
   }, []);
@@ -46,7 +55,10 @@ const ClassLabel = (props: IClassLable) => {
       newValue: unknown,
       actionMeta: ActionMeta<unknown>
     ) => {
-      region.msg = newValue as IMessage;
+      debugger;
+      //@ts-ignore
+      region.antTag[actionMeta?.name.toString()] = newValue as IAnnotTags;
+
       if (props.onSelectionChange) props.onSelectionChange({ ...region });
       setRegion(region);
     };
@@ -73,21 +85,29 @@ const ClassLabel = (props: IClassLable) => {
                 />
               </div>
             </div>
-            <div className="inputbody">
-              <Select
-                options={props.msglist}
-                styles={colorStyle}
-                placeholder="Select Error Code"
-                value={region.msg}
-                onChange={handleOnChange}
-              />
-            </div>
+
+            {props.annotlist.map((antclass: IAnnoteClass, indx: number) => (
+              <div className="inputbody" key={indx + "_classlist"}>
+                <Select
+                  options={antclass.ianotTag}
+                  styles={colorStyle}
+                  placeholder={antclass.placeHolder}
+                  value={region.antTag[antclass.name]}
+                  onChange={handleOnChange}
+                  name={antclass.name}
+                />
+              </div>
+            ))}
             <div className="footer">
               <div
-                className={`buttondone ${region.msg?'active':''}`}
+                className={`buttondone ${
+                  Object.keys(region.antTag).length === props.annotlist.length
+                    ? "active"
+                    : ""
+                }`}
                 onClick={(e: any) => {
                   if (props.onSave) props.onSave(e);
-                  setOpenModal(false || region.msg === undefined);
+                  setOpenModal(false || region.antTag === undefined);
                 }}
               >
                 <span>✓</span>
@@ -106,7 +126,9 @@ const ClassLabel = (props: IClassLable) => {
               top: `${ReverseSampling_Y(props.pix, y) + 10}px`
             }}
           >
-            {region.msg?.label || "Select "}
+            {Object.keys(region.antTag)
+              .map((m: string) => `${m}: ${region.antTag[m].label || ""}`)
+              .join(" ")}
           </div>
         )}
       </>

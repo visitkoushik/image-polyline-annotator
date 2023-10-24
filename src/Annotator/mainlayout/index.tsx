@@ -11,13 +11,14 @@ import ShapePolygon from "../draw-shapes/shape-polygon";
 import Pointer from "../pointer";
 
 import ClassLabel from "../ClassLabel";
-import { mousePolyEvent } from "../draw-shapes/mousePolyEvent";
-import { mouseRectEvent } from "../draw-shapes/mouseRectEvent";
+import { mousePolyEvent } from "./eventMousePoly";
+import { mouseRectEvent } from "./eventMouseRect";
 import { toPng } from "html-to-image";
 import {
   REGION_KEY_SHIFT_HORIZ,
   REGION_KEY_SHIFT_VERT
 } from "../model/constants";
+import { EventKeyBoard } from "./eventKeyboard";
 
 const MainLayout = forwardRef((props: IMainLayout, ref) => {
   const [appimg, setAppimg] = useState<IAppImage>();
@@ -29,7 +30,8 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     strokeWidth: "2",
     points: "",
     inEditmode: true,
-    pix: { x: 1, y: 1 }
+    pix: { x: 1, y: 1 },
+    antTag:{}
   };
 
   const [selectedRegion, setSelectedRegion] = useState<
@@ -79,7 +81,8 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     strokeWidth: "2",
     points: "",
     inEditmode: true,
-    pix: pix || { x: 1, y: 1 }
+    pix: pix || { x: 1, y: 1 },
+    antTag:{}
   };
 
   useEffect(() => {
@@ -131,122 +134,29 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
   }, [props.images]);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+    const evkey =   EventKeyBoard(
+      setCoordinate,
+      selectedRegion,
+      setSelectedRegion,
+
+      setDrawable,
+      setEditable,
+
+      setNewPoly,
+      pix,
+
+      setLen,
+      onCreatePolygon,
+
+      setDrawMode
+    );
+
+    window.addEventListener("keydown", evkey.handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", evkey.handleKeyDown);
     };
   });
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    console.log(event.code);
-
-    if (event.code === "Escape") {
-      setSelectedRegion(null);
-      setDrawMode("");
-      setEditable(false);
-      setDrawable(false);
-      setCoordinate("");
-      setNewPoly(false);
-      setLen(0);
-    }
-    if (event.code === "ArrowRight") {
-      if (selectedRegion?.id) {
-        let pant = "";
-        const listOfX = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 === 0);
-        const listOfY = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 !== 0);
-
-        const listXNew = listOfX.map(
-          (xl: string) => +xl + REGION_KEY_SHIFT_HORIZ / pix.x + ""
-        );
-
-        if (listOfY.length === listXNew.length) {
-          for (let i = 0; i < listXNew.length; i++) {
-            pant = pant + `${listXNew[i]} ${listOfY[i]} `;
-          }
-        }
-
-        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
-        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
-      }
-    }
-    if (event.code === "ArrowLeft") {
-      if (selectedRegion?.id) {
-        let pant = "";
-        const listOfX = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 === 0);
-        const listOfY = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 !== 0);
-
-        const listXNew = listOfX.map(
-          (xl: string) => +xl - REGION_KEY_SHIFT_HORIZ / pix.x + ""
-        );
-
-        if (listOfY.length === listXNew.length) {
-          for (let i = 0; i < listXNew.length; i++) {
-            pant = pant + `${listXNew[i]} ${listOfY[i]} `;
-          }
-        }
-
-        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
-        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
-      }
-    }
-    if (event.code === "ArrowUp") {
-      if (selectedRegion?.id) {
-        let pant = "";
-        const listOfX = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 === 0);
-        const listOfY = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 !== 0);
-
-        const listYNew = listOfY.map(
-          (yl: string) => +yl - REGION_KEY_SHIFT_VERT / pix.y + ""
-        );
-
-        if (listOfX.length === listYNew.length) {
-          for (let i = 0; i < listYNew.length; i++) {
-            pant = pant + `${listOfX[i]} ${listYNew[i]} `;
-          }
-        }
-
-        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
-        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
-      }
-    }
-    if (event.code === "ArrowDown") {
-      if (selectedRegion?.id) {
-        let pant = "";
-        const listOfX = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 === 0);
-        const listOfY = selectedRegion.points
-          .split(" ")
-          .filter((f: any, o: number) => o % 2 !== 0);
-
-        const listYNew = listOfY.map(
-          (yl: string) => +yl + REGION_KEY_SHIFT_VERT / pix.y + ""
-        );
-
-        if (listOfX.length === listYNew.length) {
-          for (let i = 0; i < listYNew.length; i++) {
-            pant = pant + `${listOfX[i]} ${listYNew[i]} `;
-          }
-        }
-
-        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
-        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
-      }
-    }
-  };
 
   useImperativeHandle(ref, () => ({
     saveRegionList: () => {
@@ -259,7 +169,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       return null;
     },
     setDrawModePolly: () => {
-   
+      onCreatePolygon();
       setDrawable(false);
       setEditable(true);
       setCoordinate("");
@@ -269,7 +179,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       setDrawMode("Poly");
     },
     setDrawModeRect: () => {
-       
+      onCreatePolygon();
       setDrawable(false);
       setEditable(true);
       setCoordinate("");
@@ -317,8 +227,8 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     changedRg.points = `${changedRg.points} ${changedRg.points.split(" ")[0]} ${
       changedRg.points.split(" ")[1]
     }`;
- 
-    const type =   "Polygon" 
+
+    const type = "Polygon";
     const cStateUpdated = {
       ...cState,
       points: changedRg.points,
@@ -385,8 +295,6 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     onCreatePolygon,
     regionList,
     setRegionList,
-    setShowOverlay,
-    drawMode,
     setDrawMode
   );
   const rectEvent = mouseRectEvent(
@@ -403,13 +311,9 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     newPoly,
     setNewPoly,
     pix,
-    len,
-    setLen,
     onCreatePolygon,
     regionList,
     setRegionList,
-    setShowOverlay,
-    drawMode,
     setDrawMode
   );
   const getMouseDown = () => {
@@ -446,7 +350,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
 
   const handleSelection = (e: IRegion) => {
     if (selectedRegion) {
-      setSelectedRegion({ ...selectedRegion, msg: e.msg });
+      setSelectedRegion({ ...selectedRegion, antTag: e.antTag });
     }
   };
 
@@ -505,7 +409,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
                     (r: IRegion) => r.id === rgn.id
                   );
                   if (region) {
-                    console.log(region);
+                    
                     setSelectedRegion({ ...region, inEditmode: true });
                   }
                   setDrawMode("Poly");
@@ -531,12 +435,12 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       {pix &&
         regionList &&
         regionList.length > 0 &&
-        regionList.map((r: IRegion) => (
+        regionList.map((r: IRegion,indx:number) => (
           <ClassLabel
-            key={r.id + "class"}
+            key={indx + "class"}
             region={r}
             pix={pix}
-            msglist={props.imsg}
+            annotlist={props.iantTag}
             onSave={handleSave}
             onSelectionChange={handleSelection}
             onDelete={handleRegionDelete}
