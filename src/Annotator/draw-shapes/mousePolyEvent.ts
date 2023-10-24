@@ -11,7 +11,7 @@ import { IRegion, ShapeType } from "../model/model";
 export const mousePolyEvent = (
   coordinate: string,
   setCoordinate: any,
-  selectedRegion: IRegion | null,
+  selectedRegion: IRegion | null | undefined,
   setSelectedRegion: any,
   isDrawable: boolean,
   isEditable: boolean,
@@ -80,7 +80,7 @@ export const mousePolyEvent = (
   const mouseMove = (e: any) => {
     if (e.button !== 0 || !isDrawable || !selectedRegion) return;
 
-    if (coordinate) {
+    if (coordinate.length>0) {
       if (e.button === 0) {
         if (selectedRegion?.points) {
           setSelectedRegion({

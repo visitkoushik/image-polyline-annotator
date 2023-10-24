@@ -2,7 +2,6 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useReducer,
   useRef,
   useState
 } from "react";
@@ -14,10 +13,14 @@ import Pointer from "../pointer";
 import ClassLabel from "../ClassLabel";
 import { mousePolyEvent } from "../draw-shapes/mousePolyEvent";
 import { mouseRectEvent } from "../draw-shapes/mouseRectEvent";
+import { toPng } from "html-to-image";
+import {
+  REGION_KEY_SHIFT_HORIZ,
+  REGION_KEY_SHIFT_VERT
+} from "../model/constants";
 
 const MainLayout = forwardRef((props: IMainLayout, ref) => {
-  const [imgIndex, setImgIndex] = useState<number>(1);
-  const [appimg, setAppimg] = useState<IAppImage[]>();
+  const [appimg, setAppimg] = useState<IAppImage>();
   const [regionList, setRegionList] = useState<IRegion[]>([]);
   const initalstate: IRegion = {
     type: "Poly",
@@ -29,9 +32,9 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     pix: { x: 1, y: 1 }
   };
 
-  const [selectedRegion, setSelectedRegion] = useState<IRegion | null>({
-    ...initalstate
-  });
+  const [selectedRegion, setSelectedRegion] = useState<
+    IRegion | null | undefined
+  >();
   //useState<IRegion | null>(null);
   const [drawMode, setDrawMode] = useState<ShapeType>("");
   const [isDrawable, setDrawable] = useState<boolean>(false);
@@ -51,11 +54,14 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
 
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
   const imgref = useRef(null);
+  const mainContainer = useRef(null);
   const styleBoard = {
     width: `calc(100% - ${(props.gap || 0) / 2}px)`,
     height: `calc(100% - ${(props.gap || 0) / 2}px )`,
     left: "0px",
     top: "0px",
+
+    userSelect: "none" as any,
     position: "absolute" as any
   };
   const styleBoardContainer = {
@@ -63,6 +69,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     height: `${props.height ? props.height - (props.gap || 0) + "px" : "100%"}`,
     left: `${(props.gap || 0) / 2}px`,
     top: `${(props.gap || 0) / 2}px`,
+    userSelect: "none" as any,
     position: "relative" as any
   };
   let defaultPolyRegion: IRegion = {
@@ -110,12 +117,8 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
 
   useEffect(() => {
     setAppimg(props.images);
-    if (
-      props.images &&
-      props.images[imgIndex] &&
-      props.images[imgIndex].regions
-    ) {
-      setRegionList([...(props.images[imgIndex].regions || [])]);
+    if (props.images && props.images.regions) {
+      setRegionList([...(props.images.regions || [])]);
     }
 
     setDrawMode("");
@@ -125,13 +128,131 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     setSelectedRegion(null);
     setNewPoly(false);
     setLen(0);
-  }, [props.images, imgIndex]);
+  }, [props.images]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    console.log(event.code);
+
+    if (event.code === "Escape") {
+      setSelectedRegion(null);
+      setDrawMode("");
+      setEditable(false);
+      setDrawable(false);
+      setCoordinate("");
+      setNewPoly(false);
+      setLen(0);
+    }
+    if (event.code === "ArrowRight") {
+      if (selectedRegion?.id) {
+        let pant = "";
+        const listOfX = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 === 0);
+        const listOfY = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 !== 0);
+
+        const listXNew = listOfX.map(
+          (xl: string) => +xl + REGION_KEY_SHIFT_HORIZ / pix.x + ""
+        );
+
+        if (listOfY.length === listXNew.length) {
+          for (let i = 0; i < listXNew.length; i++) {
+            pant = pant + `${listXNew[i]} ${listOfY[i]} `;
+          }
+        }
+
+        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
+        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
+      }
+    }
+    if (event.code === "ArrowLeft") {
+      if (selectedRegion?.id) {
+        let pant = "";
+        const listOfX = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 === 0);
+        const listOfY = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 !== 0);
+
+        const listXNew = listOfX.map(
+          (xl: string) => +xl - REGION_KEY_SHIFT_HORIZ / pix.x + ""
+        );
+
+        if (listOfY.length === listXNew.length) {
+          for (let i = 0; i < listXNew.length; i++) {
+            pant = pant + `${listXNew[i]} ${listOfY[i]} `;
+          }
+        }
+
+        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
+        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
+      }
+    }
+    if (event.code === "ArrowUp") {
+      if (selectedRegion?.id) {
+        let pant = "";
+        const listOfX = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 === 0);
+        const listOfY = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 !== 0);
+
+        const listYNew = listOfY.map(
+          (yl: string) => +yl - REGION_KEY_SHIFT_VERT / pix.y + ""
+        );
+
+        if (listOfX.length === listYNew.length) {
+          for (let i = 0; i < listYNew.length; i++) {
+            pant = pant + `${listOfX[i]} ${listYNew[i]} `;
+          }
+        }
+
+        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
+        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
+      }
+    }
+    if (event.code === "ArrowDown") {
+      if (selectedRegion?.id) {
+        let pant = "";
+        const listOfX = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 === 0);
+        const listOfY = selectedRegion.points
+          .split(" ")
+          .filter((f: any, o: number) => o % 2 !== 0);
+
+        const listYNew = listOfY.map(
+          (yl: string) => +yl + REGION_KEY_SHIFT_VERT / pix.y + ""
+        );
+
+        if (listOfX.length === listYNew.length) {
+          for (let i = 0; i < listYNew.length; i++) {
+            pant = pant + `${listOfX[i]} ${listYNew[i]} `;
+          }
+        }
+
+        onCreatePolygon({ ...selectedRegion, points: pant.trim() });
+        setSelectedRegion({ ...selectedRegion, points: pant.trim() });
+      }
+    }
+  };
 
   useImperativeHandle(ref, () => ({
     saveRegionList: () => {
       if (appimg) {
         return {
-          ...appimg[imgIndex],
+          ...appimg,
           regions: [...regionList]
         };
       }
@@ -142,32 +263,51 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     },
     setDrawModeRect: () => {
       setDrawMode("RECTANGLE");
+    },
+    downloadasImage: () => {
+      if (mainContainer.current === null) {
+        return;
+      }
+      setSelectedRegion(null);
+
+      toPng(mainContainer.current, { cacheBust: true })
+        .then((dataUrl) => {
+          const link = document.createElement("a");
+          link.download = "my-image-name.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }));
 
-  const onCreatePolygon = () => {
-    if (!selectedRegion) {
+  const onCreatePolygon = (changedRegion?: IRegion) => {
+    const changedRg = changedRegion || selectedRegion;
+
+    if (!changedRg) {
       return;
     }
+
     const cState = {
-      ...selectedRegion,
-      id: selectedRegion.id || Date.now() + "",
+      ...changedRg,
+      id: changedRg.id || Date.now() + "",
       inEditmode: false
     };
-    selectedRegion.points = selectedRegion.points
+    changedRg.points = changedRg.points
       .split(" ")
-      .splice(0, selectedRegion.points.split(" ").length - 2)
+      .splice(0, changedRg.points.split(" ").length - 2)
       .join(" ");
 
-    selectedRegion.points = `${selectedRegion.points} ${
-      selectedRegion.points.split(" ")[0]
-    } ${selectedRegion.points.split(" ")[1]}`;
-
-    const length = Array.from(new Set(selectedRegion.points.split(" "))).length;
-    const type = length !== 4 ? "Polygon" : "Rectangle";
+    changedRg.points = `${changedRg.points} ${changedRg.points.split(" ")[0]} ${
+      changedRg.points.split(" ")[1]
+    }`;
+ 
+    const type =   "Polygon" 
     const cStateUpdated = {
       ...cState,
-      points: selectedRegion.points,
+      points: changedRg.points,
       type: type
     };
     const indx = regionList.findIndex((r) => r.id === cStateUpdated.id);
@@ -311,13 +451,14 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     setShowOverlay(true);
     setDrawMode("Poly");
   };
-  return appimg && appimg.length > imgIndex ? (
-    <div style={styleBoardContainer}>
+
+  return appimg && appimg.data ? (
+    <div style={styleBoardContainer} ref={mainContainer} id="maop">
       <img
         ref={imgref}
-        src={appimg[imgIndex].url}
+        src={appimg.data.toString()}
         style={styleBoard}
-        alt={appimg[imgIndex].name || ""}
+        alt={appimg.name || ""}
         onLoad={(e: any) => {
           setPix({ x: e.target.offsetWidth, y: e.target.offsetHeight });
         }}
@@ -343,10 +484,17 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
             .filter((f) => f.id !== selectedRegion?.id)
             .map((r: IRegion) => (
               <ShapePolygon
-                {...r}
+                region={{ ...r }}
                 key={r.id + "_shape"}
-                onSelectShape={() => {
-                  setSelectedRegion(r);
+                onSelectShape={(rgn: IRegion) => {
+                  const region = regionList.find(
+                    (r: IRegion) => r.id === rgn.id
+                  );
+                  if (region) {
+                    console.log(region);
+                    setSelectedRegion({ ...region, inEditmode: true });
+                  }
+                  setDrawMode("Poly");
                 }}
               />
             ))}

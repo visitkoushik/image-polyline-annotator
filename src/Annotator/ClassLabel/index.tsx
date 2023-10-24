@@ -16,10 +16,10 @@ const ClassLabel = (props: IClassLable) => {
       fontWeight: "500"
     })
   };
-  useEffect(()=>{
-    console.log('REGION UPDATED: ',props.region)
+  useEffect(() => {
+    // console.log("REGION UPDATED: ", props.region);
     setRegion({ ...props.region });
-  },[props.region])
+  }, [props.region]);
 
   useEffect(() => {
     if (!region.msg) {
@@ -46,7 +46,6 @@ const ClassLabel = (props: IClassLable) => {
       newValue: unknown,
       actionMeta: ActionMeta<unknown>
     ) => {
- 
       region.msg = newValue as IMessage;
       if (props.onSelectionChange) props.onSelectionChange({ ...region });
       setRegion(region);

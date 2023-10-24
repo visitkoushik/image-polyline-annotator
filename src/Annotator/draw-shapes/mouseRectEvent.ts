@@ -1,17 +1,10 @@
-import { isEditable } from "@testing-library/user-event/dist/utils";
-import {
-  Pointer_Height_Width,
-  ReverseSampling_X,
-  ReverseSampling_Y,
-  XSampling,
-  YSampling
-} from "../model/constants";
+import { XSampling, YSampling } from "../model/constants";
 import { IRegion, ShapeType } from "../model/model";
 
 export const mouseRectEvent = (
   coordinate: string,
   setCoordinate: any,
-  selectedRegion: IRegion | null,
+  selectedRegion: IRegion | null | undefined,
   setSelectedRegion: any,
   isDrawable: boolean,
   isEditable: boolean,
@@ -51,7 +44,7 @@ export const mouseRectEvent = (
     }
 
     if (!isDrawable && !isEditable && selectedRegion?.points) {
-      updateRegionList({...selectedRegion});
+      updateRegionList({ ...selectedRegion });
       setSelectedRegion(null);
       setDrawMode("");
       return;
@@ -80,7 +73,29 @@ export const mouseRectEvent = (
 
   const mouseMove = (e: any) => {
     if (e.button !== 0 || !isDrawable || !selectedRegion) return;
-
+    if (coordinate.length > 0) {
+      if (e.button === 0) {
+        if (selectedRegion?.points) {
+          setSelectedRegion({
+            ...selectedRegion,
+            points: selectedRegion.points.replaceAll(
+              coordinate,
+              `${XSampling(pix, e.clientX - imgPos.x)} ${YSampling(
+                pix,
+                e.clientY - imgPos.y
+              )}`
+            )
+          });
+          setCoordinate(
+            `${XSampling(pix, e.clientX - imgPos.x)} ${YSampling(
+              pix,
+              e.clientY - imgPos.y
+            )}`
+          );
+        }
+      }
+      return;
+    }
     let clonedRegion = { ...selectedRegion };
     const clonedRegion_x = XSampling(pix, e.clientX - imgPos.x);
     const clonedRegion_y = YSampling(pix, e.clientY - imgPos.y);
@@ -103,13 +118,12 @@ export const mouseRectEvent = (
     if (e.button !== 0 || !isDrawable || !isEditable || !selectedRegion) return;
 
     setEditable(false);
-    onCreatePolygon();
+    if (coordinate.length === 0) onCreatePolygon();
   };
- 
 
   return {
     mouseDown,
     mouseMove,
-    mouseUp 
+    mouseUp
   };
 };

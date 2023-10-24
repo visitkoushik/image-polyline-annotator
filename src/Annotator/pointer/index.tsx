@@ -3,12 +3,11 @@ import {
   ReverseSampling_X,
   ReverseSampling_Y
 } from "../model/constants";
-import { IPointer, IRegion } from "../model/model";
-
+import { IPointer } from "../model/model";
 
 const Pointer = (props: IPointer) => {
   const coordinates: number[][] = [];
-  let allpoints = props.region.points.split(" "); 
+  let allpoints = props.region.points.split(" ");
   if (allpoints.length <= 1) {
     return <></>;
   }
@@ -16,7 +15,7 @@ const Pointer = (props: IPointer) => {
   for (let i = 0, points = allpoints; i < points.length; i += 2) {
     coordinates.push([+points[i], +points[i + 1]]);
   }
- 
+
   return (
     <>
       {coordinates.length > 0 &&
@@ -28,11 +27,11 @@ const Pointer = (props: IPointer) => {
               style={{
                 position: "absolute",
                 left:
-                  ReverseSampling_X(props.region.pix,  c[0]) -
-                  Pointer_Height_Width / 2   ,
+                  ReverseSampling_X(props.region.pix, c[0]) -
+                  Pointer_Height_Width / 2,
                 top:
-                  ReverseSampling_Y(props.region.pix,   c[1]) -
-                  Pointer_Height_Width / 2  ,
+                  ReverseSampling_Y(props.region.pix, c[1]) -
+                  Pointer_Height_Width / 2,
                 width: Pointer_Height_Width,
                 height: Pointer_Height_Width,
                 border: `1px solid #ffffff`,
