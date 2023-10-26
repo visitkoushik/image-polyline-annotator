@@ -77,15 +77,16 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
           style={{
             width: `${props.width}px`,
             height: `${HW_SIZE}px`,
-            background: "rgb(232 232 194)",
+            background: "rgb(255 255 255)",
             display: "flex",
             justifyContent: "space-between",
-            gap: "10px"
+            gap: "10px",
+            boxShadow: "rgba(136, 136, 136, 0.533) 0px 7px 20px 0px",
           }}
         >
           <div
             style={{
-              height: `${HW_SIZE}px`
+              height: `${HW_SIZE}px`,
             }}
             className="label"
           >
@@ -97,7 +98,7 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
               background: "#00000000",
               display: "flex",
               justifyContent: "flex-end",
-              gap: "10px"
+              gap: "10px",
             }}
           >
             <button
@@ -133,16 +134,18 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
           style={{
             width: `${HW_SIZE}px`,
             height: `${props.height - HW_SIZE}px`,
-            background: "rgb(232 232 194)",
-            display: "block",
-            justifyContent: "flex-end"
+            background: "rgb(255 255 255)",
+            display: "flex",
+            flexShrink: "0",
+            flexDirection: "column",
+            boxShadow: "rgba(136, 136, 136, 0.533) 3px 0px 20px 0px",
           }}
         >
           <button
             style={{
               width: "100%",
               height: "50px",
-              padding: 0
+              padding: 0,
             }}
             onClick={() => {
               if (mainRef?.current) {
@@ -160,7 +163,7 @@ const Annotator = forwardRef((props: IAnnotator, ref) => {
             style={{
               width: "100%",
               height: "50px",
-              padding: 0
+              padding: 0,
             }}
             onClick={() => {
               if (mainRef?.current) {
