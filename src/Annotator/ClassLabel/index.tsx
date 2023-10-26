@@ -15,6 +15,8 @@ import {
 import Select, { ActionMeta, StylesConfig } from "react-select";
 import "./clslabel.css";
 
+import trashicon from '../assets/delete-77.svg';
+
 const ClassLabel = (props: IClassLable) => {
   const [openmodal, setOpenModal] = useState(
     Object.keys(props.region?.antTag).length === 0
@@ -91,7 +93,7 @@ const ClassLabel = (props: IClassLable) => {
             className="modalbody"
             style={{
               left: `${ReverseSampling_X(props.pix, x) + 10}px`,
-              top: `${ReverseSampling_Y(props.pix, y) + 10}px`
+              top: `${ReverseSampling_Y(props.pix, y) + 10}px`,
             }}
           >
             <div className="header">
@@ -118,7 +120,7 @@ const ClassLabel = (props: IClassLable) => {
               </div>
               <div className="deletebtn">
                 <img
-                  src={process.env.PUBLIC_URL + "/delete-77.svg"}
+                  src={trashicon}
                   alt="delete"
                   onClick={() =>
                     props.onDelete ? props.onDelete(region) : () => {}
@@ -164,7 +166,7 @@ const ClassLabel = (props: IClassLable) => {
             }}
             style={{
               left: `${ReverseSampling_X(props.pix, x) + 10}px`,
-              top: `${ReverseSampling_Y(props.pix, y) + 10}px`
+              top: `${ReverseSampling_Y(props.pix, y) + 10}px`,
             }}
           >
             {Object.keys(region.antTag)

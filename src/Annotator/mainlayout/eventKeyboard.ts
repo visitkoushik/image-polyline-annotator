@@ -18,7 +18,7 @@ export const EventKeyBoard = (
   setLen: any,
   onCreatePolygon: any,
 
-  setDrawMode: React.Dispatch<React.SetStateAction<ShapeType>>
+  setDrawMode: (s:ShapeType)=>void
 ) => {
   const handleKeyDown = (event: KeyboardEvent) => {
  

@@ -40,16 +40,17 @@ function App() {
 
   return (
     <>
+    
       <Annotator
         ref={annotRef}
         label=""
         images={[
           {
-            url: "https://placekitten.com/408/285"
+            url: "https://placekitten.com/408/285",
           },
           {
-            url: "https://placekitten.com/307/215"
-          }
+            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU3B1oC3fGIsL1den7eEUmPl8HLk_-mVDTowvovao4_3Gv4-OaLkAcIhrMqcfzj06ZHek&usqp=CAU",
+          },
         ]}
         width={1024}
         height={740}

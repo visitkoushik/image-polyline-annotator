@@ -6,6 +6,7 @@ export interface IMainLayout {
   width: number;
   height: number;
   gap?: number;
+  onChangeDrawMode:(e:ShapeType)=>void;
 }
 
 export interface IRegion {

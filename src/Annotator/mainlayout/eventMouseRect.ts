@@ -18,7 +18,7 @@ export const mouseRectEvent = (
   onCreatePolygon: any,
   regionList: IRegion[],
   setRegionList: any,
-  setDrawMode: React.Dispatch<React.SetStateAction<ShapeType>>
+  setDrawMode: (shp:ShapeType)=>void
 ) => {
   const updateRegionList = (region: IRegion): IRegion[] => {
     const newRegionList = regionList.map((r: IRegion) => {

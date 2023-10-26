@@ -1,4 +1,3 @@
-import { isEditable } from "@testing-library/user-event/dist/utils";
 import {
   Pointer_Height_Width,
   ReverseSampling_X,
@@ -27,7 +26,7 @@ export const mousePolyEvent = (
   onCreatePolygon: any,
   regionList: IRegion[],
   setRegionList: any,
-  setDrawMode: React.Dispatch<React.SetStateAction<ShapeType>>
+  setDrawMode: (shp:ShapeType)=>void
 ) => {
   const updateRegionList = (region: IRegion): IRegion[] => {
     const newRegionList = regionList.map((r: IRegion) => {
@@ -78,7 +77,7 @@ export const mousePolyEvent = (
   const mouseMove = (e: any) => {
     if (e.button !== 0 || !isDrawable || !selectedRegion) return;
 
-    if (coordinate.length>0) {
+    if (coordinate.length > 0) {
       if (e.button === 0) {
         if (selectedRegion?.points) {
           setSelectedRegion({

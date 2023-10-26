@@ -39,12 +39,16 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     IRegion | null | undefined
   >();
   //useState<IRegion | null>(null);
-  const [drawMode, setDrawMode] = useState<ShapeType>("");
+  const [drawMode, setdrawMode] = useState<ShapeType>("");
   const [isDrawable, setDrawable] = useState<boolean>(false);
   const [isEditable, setEditable] = useState<boolean>(false);
   const [len, setLen] = useState<number>(0);
   const [newPoly, setNewPoly] = useState<boolean>(true);
-
+  const setDrawMode =(shp:ShapeType)=>{
+    debugger
+      setdrawMode(shp);
+      if(props.onChangeDrawMode) props.onChangeDrawMode(shp);
+  }
   const [coordinate, setCoordinate] = useState<string>("");
   const [pix, setPix] = useState<{ x: number; y: number }>({
     x: 1,

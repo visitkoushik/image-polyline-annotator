@@ -28,7 +28,7 @@ export const ReverseSampling_Y = (
 export const hexToRgba = (hex: any, alpha: number) => {
   // Remove the hash symbol if it's present
   hex = hex.replace("#", "");
-debugger
+ 
   // Parse the hex values for red, green, and blue components
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
@@ -57,6 +57,6 @@ export const rgbaToHex = (rgba: string) => {
 
   // Create the RGBA string
   const hex = `#${r}${g}${b}`;
-  debugger;
+ 
   return hex;
 };
