@@ -115,8 +115,9 @@ const ClassLabel = (props: IClassLable) => {
                   }}
                   onChange={handleonChangeColor}
                 />
-
+                <span style={{filter: "invert(1)",color:rgbaToHex(region.color)}}>
                 {region.type}
+                </span>
               </div>
               <div className="deletebtn">
                 <img

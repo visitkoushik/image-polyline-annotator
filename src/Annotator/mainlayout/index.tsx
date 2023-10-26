@@ -14,11 +14,7 @@ import ClassLabel from "../ClassLabel";
 import { mousePolyEvent } from "./eventMousePoly";
 import { mouseRectEvent } from "./eventMouseRect";
 import { toPng } from "html-to-image";
-import {
-  REGION_KEY_SHIFT_HORIZ,
-  REGION_KEY_SHIFT_VERT,
-  hexToRgba
-} from "../model/constants";
+ 
 import { EventKeyBoard } from "./eventKeyboard";
 
 const MainLayout = forwardRef((props: IMainLayout, ref) => {
