@@ -22,6 +22,7 @@ function App() {
 
   return (
     <>
+    
       <Annotator
         ref={annotRef}
         label=""
