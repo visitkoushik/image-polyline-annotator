@@ -38,12 +38,12 @@
   width: 50px;
   height: 7px;
   color: #fff;
-  background-color: red;
   border-radius: 5px;
   line-height: 7px;
   padding: 8px;
   text-align: center;
   font-weight: bold;
+  cursor: pointer;
 }
 .modalbody > .header > .deletebtn {
   width: 20px;

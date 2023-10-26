@@ -46,6 +46,7 @@ export interface IClassLable {
   onSave?: (e: IRegion) => void;
   onSelectionChange?: (e: IRegion) => void;
   onDelete?: (e: IRegion) => void;
+  onChangeColor: (e: IRegion) => void;
   region: IRegion;
   pix: { x: number; y: number };
   annotlist: IAnnoteClass[];

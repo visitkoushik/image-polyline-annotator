@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Custom Color Picker</title>
+    <style>
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            top:50%;
+            left:50%;
+            position: absolute;
+            cursor: pointer;
+        }
+        .color-picker-dialog {
+            position: absolute;
+            top: 60px; /* Adjust the top position as needed */
+            left: 60px; /* Adjust the left position as needed */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="colorPicker" class="color-picker">
+        <input type="color"  id="hiddenValue" name="hiddenValue" value="This is a hidden value"/>
+        CPiker
+    </div>
+    <div id="colorDisplay" style="width: 200px; height: 200px;"></div>
+    
+    <script>
+        const colorPicker = document.getElementById("colorPicker");
+        const colorDisplay = document.getElementById("colorDisplay");
+
+        colorPicker.addEventListener("click", function() {
+            // Open the color picker dialog
+            const colorInput = document.getElementById("hiddenValue");
+          
+            colorInput.type = "color";  
+            colorInput.addEventListener("input", function() {
+                const selectedColor = colorInput.value;
+                colorDisplay.style.backgroundColor = selectedColor;
+                colorPicker.removeChild(colorInput)
+            });
+
+            // Trigger a click event on the color input to open the color picker dialog
+            colorInput.click();
+        });
+    </script>
+</body>
+</html>

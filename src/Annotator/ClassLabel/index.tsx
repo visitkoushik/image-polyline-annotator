@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { ReverseSampling_X, ReverseSampling_Y } from "../model/constants";
+import { useEffect, useRef, useState } from "react";
+import {
+  ReverseSampling_X,
+  ReverseSampling_Y,
+  hexToRgba,
+  rgbaToHex
+} from "../model/constants";
 import {
   IClassLable,
   IAnnotTags,
@@ -15,7 +20,7 @@ const ClassLabel = (props: IClassLable) => {
     Object.keys(props.region?.antTag).length === 0
   );
   const [region, setRegion] = useState<IRegion>({ ...props.region });
-
+  const colorinputref = useRef<HTMLInputElement | null>(null);
   const colorStyle: StylesConfig = {
     control: (styles) => ({
       ...styles,
@@ -55,14 +60,30 @@ const ClassLabel = (props: IClassLable) => {
       newValue: unknown,
       actionMeta: ActionMeta<unknown>
     ) => {
-      debugger;
       //@ts-ignore
       region.antTag[actionMeta?.name.toString()] = newValue as IAnnotTags;
 
-      if (props.onSelectionChange) props.onSelectionChange({ ...region });
+      if (props.onSelectionChange) props.onSelectionChange(region);
       setRegion(region);
     };
 
+    const handleColorPicker = () => {
+      if (colorinputref.current && document.getElementById("colorpicker")) {
+        const ele = document.getElementById("colorpicker");
+        //@ts-ignore
+        ele.click();
+      }
+    };
+
+    const handleonChangeColor = (event: any) => {
+      const selectedColor = event.currentTarget.value;
+
+      region.fill = hexToRgba(selectedColor, 0.25);
+      region.color = hexToRgba(selectedColor, 0.75);
+
+      if (props.onChangeColor) props.onChangeColor(region);
+      setRegion(region);
+    };
     return (
       <>
         {openmodal ? (
@@ -74,7 +95,27 @@ const ClassLabel = (props: IClassLable) => {
             }}
           >
             <div className="header">
-              <div className="typeheader">{region.type}</div>
+              <div
+                className="typeheader"
+                style={{ backgroundColor: `${region.color}` }}
+                onClick={handleColorPicker}
+              >
+                <input
+                  type="color"
+                  id="colorpicker"
+                  value={rgbaToHex(region.color)}
+                  ref={colorinputref}
+                  style={{
+                    width: "1px",
+                    height: "1px",
+                    visibility: "hidden",
+                    position: "absolute"
+                  }}
+                  onChange={handleonChangeColor}
+                />
+
+                {region.type}
+              </div>
               <div className="deletebtn">
                 <img
                   src={process.env.PUBLIC_URL + "/delete-77.svg"}

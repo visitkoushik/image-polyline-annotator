@@ -16,7 +16,8 @@ import { mouseRectEvent } from "./eventMouseRect";
 import { toPng } from "html-to-image";
 import {
   REGION_KEY_SHIFT_HORIZ,
-  REGION_KEY_SHIFT_VERT
+  REGION_KEY_SHIFT_VERT,
+  hexToRgba
 } from "../model/constants";
 import { EventKeyBoard } from "./eventKeyboard";
 
@@ -31,7 +32,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     points: "",
     inEditmode: true,
     pix: { x: 1, y: 1 },
-    antTag:{}
+    antTag: {}
   };
 
   const [selectedRegion, setSelectedRegion] = useState<
@@ -82,7 +83,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     points: "",
     inEditmode: true,
     pix: pix || { x: 1, y: 1 },
-    antTag:{}
+    antTag: {}
   };
 
   useEffect(() => {
@@ -134,7 +135,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
   }, [props.images]);
 
   useEffect(() => {
-    const evkey =   EventKeyBoard(
+    const evkey = EventKeyBoard(
       setCoordinate,
       selectedRegion,
       setSelectedRegion,
@@ -353,7 +354,11 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       setSelectedRegion({ ...selectedRegion, antTag: e.antTag });
     }
   };
-
+  const handleChangeColor = (e: IRegion) => {
+    setSelectedRegion({
+      ...e
+    });
+  };
   const handleRegionDelete = (e: IRegion) => {
     const rgl = regionList.filter((r: IRegion) => r.id !== e.id);
     setShowOverlay(false);
@@ -409,7 +414,6 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
                     (r: IRegion) => r.id === rgn.id
                   );
                   if (region) {
-                    
                     setSelectedRegion({ ...region, inEditmode: true });
                   }
                   setDrawMode("Poly");
@@ -435,7 +439,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
       {pix &&
         regionList &&
         regionList.length > 0 &&
-        regionList.map((r: IRegion,indx:number) => (
+        regionList.map((r: IRegion, indx: number) => (
           <ClassLabel
             key={indx + "class"}
             region={r}
@@ -445,6 +449,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
             onSelectionChange={handleSelection}
             onDelete={handleRegionDelete}
             onClick={handleClick}
+            onChangeColor={handleChangeColor}
           />
         ))}
     </div>

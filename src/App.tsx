@@ -17,7 +17,25 @@ function App() {
         { label: "class5", value: 5 }
       ]
     },
- 
+    {
+      name: "Name2",
+      placeHolder: "Select Name2",
+      ianotTag: [
+       
+        { label: "class4", value: 4 },
+        { label: "class5", value: 5 },
+        { label: "class6", value: 6 }
+      ]
+    },{
+      name: "Name3",
+      placeHolder: "Select Name3",
+      ianotTag: [
+       
+        { label: "class1", value: 1 },
+        { label: "class2", value: 2 },
+        { label: "class3", value: 3 }
+      ]
+    },
   ];
 
   return (
