@@ -1,33 +1,37 @@
 .label {
-
-    background: rgba(0, 0, 0, 0);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 10px;
-    font-size: 1rem;
-    font-weight: bold;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .svg-button {
-    background-color: transparent;
-    color: #292929;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5em 1em;
-    /* Adjust the padding as needed */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    font-weight: bold;
+  background-color: transparent;
+  color: #292929;
+  border: none;
+  padding: 0.5em 1em;
+  /* Adjust the padding as needed */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-weight: bold;
 }
 
 .svg-button svg {
-    fill: currentColor;
-    width: auto;
-    height: 1rem;
-    padding: 0 4px;
-    margin: 0;
-    cursor: "pointer"
+  fill: currentColor;
+  width: auto;
+  height: 1rem;
+  padding: 0 4px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.disabled {
+  background-color: #80808080;
+  color: #808080;
+  cursor: not-allowed;
 }

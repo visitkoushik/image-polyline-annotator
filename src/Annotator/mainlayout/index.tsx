@@ -14,7 +14,7 @@ import ClassLabel from "../ClassLabel";
 import { mousePolyEvent } from "./eventMousePoly";
 import { mouseRectEvent } from "./eventMouseRect";
 import { toPng } from "html-to-image";
- 
+
 import { EventKeyBoard } from "./eventKeyboard";
 
 const MainLayout = forwardRef((props: IMainLayout, ref) => {
@@ -34,18 +34,16 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
   const [selectedRegion, setSelectedRegion] = useState<
     IRegion | null | undefined
   >();
+
   //useState<IRegion | null>(null);
-  const [drawMode, setdrawMode] = useState<ShapeType>("");
+  const [drawMode, setDrawMode] = useState<ShapeType>("");
   const [isDrawable, setDrawable] = useState<boolean>(false);
   const [isEditable, setEditable] = useState<boolean>(false);
   const [len, setLen] = useState<number>(0);
   const [newPoly, setNewPoly] = useState<boolean>(true);
-  const setDrawMode =(shp:ShapeType)=>{
-    debugger
-      setdrawMode(shp);
-      if(props.onChangeDrawMode) props.onChangeDrawMode(shp);
-  }
+
   const [coordinate, setCoordinate] = useState<string>("");
+
   const [pix, setPix] = useState<{ x: number; y: number }>({
     x: 1,
     y: 1
@@ -56,6 +54,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
   });
 
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
+
   const imgref = useRef(null);
   const mainContainer = useRef(null);
   const styleBoard = {
@@ -85,6 +84,16 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
     pix: pix || { x: 1, y: 1 },
     antTag: {}
   };
+
+  useEffect(() => {
+    if (drawMode) {
+      if (props.onChangeDrawMode) props.onChangeDrawMode(drawMode);
+    }
+    if (props.onChangeDownload)
+      props.onChangeDownload(
+        !drawMode && !selectedRegion && !coordinate && !showOverlay
+      );
+  }, [drawMode, selectedRegion, coordinate, showOverlay]);
 
   useEffect(() => {
     setPix({ x: props.width, y: props.height });
@@ -376,7 +385,7 @@ const MainLayout = forwardRef((props: IMainLayout, ref) => {
   };
 
   return appimg && appimg.data ? (
-    <div style={styleBoardContainer} ref={mainContainer} id="maop">
+    <div style={styleBoardContainer} ref={mainContainer}>
       <img
         ref={imgref}
         src={appimg.data.toString()}

@@ -43,7 +43,7 @@ function App() {
     
       <Annotator
         ref={annotRef}
-        label=""
+ 
         images={[
           {
             url: "https://placekitten.com/408/285",

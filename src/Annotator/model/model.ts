@@ -7,6 +7,7 @@ export interface IMainLayout {
   height: number;
   gap?: number;
   onChangeDrawMode:(e:ShapeType)=>void;
+  onChangeDownload:(e:boolean)=>void
 }
 
 export interface IRegion {
